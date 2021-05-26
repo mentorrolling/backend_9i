@@ -3,11 +3,15 @@ const bcrypt = require("bcrypt");
 const _ = require("underscore");
 
 const Usuario = require("../modelos/usuario");
+const {
+  verificaToken,
+  verificaAdmin_role,
+} = require("../middlewares/autenticacion");
 
 const app = express();
 
 //Ruta GET
-app.get("/usuarios", function (req, res) {
+app.get("/usuarios", [verificaToken, verificaAdmin_role], function (req, res) {
   let desde = req.query.desde || 0;
   desde = Number(desde);
   let limite = req.query.limite || 5;
@@ -63,39 +67,14 @@ app.post("/usuarios", function (req, res) {
 });
 
 //Ruta PUT
-app.put("/usuarios/:id", function (req, res) {
-  let body = _.pick(req.body, ["nombre", "img", "role", "estado"]);
-  let id = req.params.id;
+app.put(
+  "/usuarios/:id",
+  [verificaToken, verificaAdmin_role],
+  function (req, res) {
+    let body = _.pick(req.body, ["nombre", "img", "role", "estado"]);
+    let id = req.params.id;
 
-  Usuario.findByIdAndUpdate(id, body, { new: true }, (err, usuarioDB) => {
-    if (err) {
-      return res.status(400).json({
-        ok: false,
-        err,
-      });
-    }
-
-    res.json({
-      ok: true,
-      usuario: usuarioDB,
-    });
-  });
-});
-
-//Ruta Delete
-app.delete("/usuarios/:id", function (req, res) {
-  // res.json("DELETE usuarios");
-  let id = req.params.id;
-
-  let estadoActualizado = {
-    estado: false,
-  };
-
-  Usuario.findByIdAndUpdate(
-    id,
-    estadoActualizado,
-    { new: true },
-    (err, usuarioBorrado) => {
+    Usuario.findByIdAndUpdate(id, body, { new: true }, (err, usuarioDB) => {
       if (err) {
         return res.status(400).json({
           ok: false,
@@ -103,20 +82,53 @@ app.delete("/usuarios/:id", function (req, res) {
         });
       }
 
-      if (!usuarioBorrado) {
-        return res.status(400).json({
-          ok: false,
-          err: {
-            message: "Usuario no encontrado",
-          },
-        });
-      }
       res.json({
         ok: true,
-        usuario: usuarioBorrado,
+        usuario: usuarioDB,
       });
-    }
-  );
-});
+    });
+  }
+);
+
+//Ruta Delete
+app.delete(
+  "/usuarios/:id",
+  [verificaToken, verificaAdmin_role],
+  function (req, res) {
+    // res.json("DELETE usuarios");
+    let id = req.params.id;
+
+    let estadoActualizado = {
+      estado: false,
+    };
+
+    Usuario.findByIdAndUpdate(
+      id,
+      estadoActualizado,
+      { new: true },
+      (err, usuarioBorrado) => {
+        if (err) {
+          return res.status(400).json({
+            ok: false,
+            err,
+          });
+        }
+
+        if (!usuarioBorrado) {
+          return res.status(400).json({
+            ok: false,
+            err: {
+              message: "Usuario no encontrado",
+            },
+          });
+        }
+        res.json({
+          ok: true,
+          usuario: usuarioBorrado,
+        });
+      }
+    );
+  }
+);
 
 module.exports = app;
