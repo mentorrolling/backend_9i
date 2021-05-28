@@ -39,6 +39,28 @@ app.get("/usuarios", [verificaToken, verificaAdmin_role], function (req, res) {
     });
 });
 
+app.get(
+  "/usuarios/:id",
+  [verificaToken, verificaAdmin_role],
+  function (req, res) {
+    let id = req.params.id;
+    // res.json("GET usuarios");
+    Usuario.findById(id).exec((err, usuario) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          err,
+        });
+      }
+
+      res.json({
+        ok: true,
+        usuario,
+      });
+    });
+  }
+);
+
 //Ruta POST
 app.post("/usuarios", function (req, res) {
   // res.json('POST usuarios')
