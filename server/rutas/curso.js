@@ -9,7 +9,7 @@ const {
 const _ = require("underscore");
 const app = express();
 
-app.get("/cursos", verificaToken, function (req, res) {
+app.get("/cursos", function (req, res) {
   // res.json("GET usuarios");
 
   let desde = req.query.desde || 0;
@@ -21,7 +21,7 @@ app.get("/cursos", verificaToken, function (req, res) {
   Curso.find({ estado: true })
     .limit(limite)
     .skip(desde)
-    .sort("title")
+    .sort("title") //ordenar alfabeticamente
     .populate("usuario", "nombre email")
     .exec((err, cursos) => {
       if (err) {
@@ -41,7 +41,7 @@ app.get("/cursos", verificaToken, function (req, res) {
     });
 });
 
-app.get("/cursos/:id", verificaToken, function (req, res) {
+app.get("/cursos/:id", function (req, res) {
   // res.json("GET usuarios");
 
   let id = req.params.id;
