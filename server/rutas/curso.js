@@ -70,6 +70,8 @@ app.post("/cursos", [verificaToken, verificaAdmin_role], function (req, res) {
     title: body.title,
     imagen: body.imagen,
     detalle: body.detalle,
+    video: body.video,
+    img_mentor: body.img_mentor,
     mentor: body.mentor,
     usuario: req.usuario._id,
   });
@@ -126,7 +128,7 @@ app.delete(
       estado: false,
     };
 
-    Cursos.findByIdAndUpdate(
+    Curso.findByIdAndUpdate(
       id,
       estadoActualizado,
       { new: true },
