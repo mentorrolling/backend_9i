@@ -6,7 +6,7 @@ let Schema = mongoose.Schema;
 let cursoSchema = new Schema({
   title: {
     type: String,
-    unique: true,
+
     required: [true, "El título es necesario"],
   },
   imagen: {
